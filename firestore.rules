@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Solo el correo del administrador (debe coincidir con adminEmail en config.js)
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email == 'xavi.maldonado100@gmail.com';
+    }
+
+    // Contenido público: todos leen, solo el admin escribe
+    match /artifacts/{appId}/public/data/club_state/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Privado: ganancias, pérdidas y teléfonos. Solo el admin.
+    match /artifacts/{appId}/private/data/club_state/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Solicitudes de reserva: cualquiera puede ENVIAR una, solo el admin las lee/borra
+    match /artifacts/{appId}/requests/{reqId} {
+      allow create: if request.resource.data.keys().hasOnly(['date','hour','team','phone','type','createdAt'])
+                    && request.resource.data.team is string && request.resource.data.team.size() <= 60
+                    && request.resource.data.phone is string && request.resource.data.phone.size() <= 30;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Todo lo demás, bloqueado
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
