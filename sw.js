@@ -1,6 +1,6 @@
 // Service worker simple: red primero, y si no hay internet usa lo último guardado.
 // Sube el número cuando cambies archivos y quieras forzar actualización.
-const CACHE = 'club-vm-v1';
+const CACHE = 'club-vm-v2';
 const SHELL = ['./', 'index.html', 'app.js', 'config.js', 'data.js', 'styles.css', 'tailwind-config.js', 'manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
